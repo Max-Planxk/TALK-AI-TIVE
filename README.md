@@ -47,7 +47,7 @@ Built as a full-stack project by a first-year engineering student. No frameworks
 | Animations | GSAP | Smooth, pro-level motion |
 | Backend | Node.js + Express.js | Server + REST API endpoints |
 | AI Brain | Groq API (LLaMA 3.3 70B) | Summarize, simplify, translate |
-| Database | Firebase Firestore | Save query history |
+| Database | Firebase Firestore | Save query history per user |
 | Auth | Firebase Auth | Email + Google sign-in |
 | Frontend Deploy | Vercel | Live URL, free tier |
 | Backend Deploy | Railway | Node.js hosting, free tier |
@@ -66,6 +66,7 @@ TALK-AI-TIVE/
 │   └── app.js            ← Voice + AI logic
 ├── BackEnd/
 │   ├── server.js         ← Express server entry point
+│   ├── firebase.js       ← Firebase Admin SDK setup
 │   ├── claude.js         ← Groq AI API integration
 │   ├── routes/
 │   │   └── claude.js     ← /api/ask route handler
@@ -86,8 +87,8 @@ TALK-AI-TIVE/
 | 🟨 Phase 3 | Voice Input + Dashboard Page | ✅ Done |
 | 🟩 Phase 4 | Backend + Groq AI API Integration | ✅ Done |
 | 🟩 Phase 4.5 | Frontend ↔ Backend Connected + Live AI Responses | ✅ Done |
-| 🔵 Phase 5 | Firebase Auth + Firestore Database | ⏳ Up Next |
-| 🏁 Phase 6 | Frontend ↔ Backend Connection + Animations + Polish | ⏳ Upcoming |
+| 🔵 Phase 5 | Firebase Auth + Firestore History Saving | ✅ Done |
+| 🏁 Phase 6 | GSAP Animations + Dashboard + UX Polish | ⏳ Up Next |
 | 🚀 Phase 7 | Deployment (Vercel + Railway) | ⏳ Upcoming |
 
 ---
@@ -99,6 +100,10 @@ TALK-AI-TIVE/
 - `/api/ask` endpoint live and tested — takes a URL + voice command → scrapes the page → returns AI response
 - Web scraping with axios + cheerio working
 - Tested with real Wikipedia URLs — sub-2 second AI responses confirmed ⚡
+- **Firebase Auth** — Email + Google sign-in working ✅
+- **Firestore Database** — Every voice query + AI response saved to user history ✅
+- `/api/history` POST endpoint — saves query to Firestore ✅
+- `/api/history/:userId` GET endpoint — retrieves user's past queries ✅
 - `.env` secured, `node_modules` and secrets gitignored ✅
 
 ---
@@ -159,8 +164,9 @@ Invoke-WebRequest -Uri "http://localhost:5000/api/ask" -Method POST -Headers @{"
 | Method | Endpoint | Status | Description |
 |---|---|---|---|
 | `POST` | `/api/ask` | ✅ Live | Send URL + command → get AI response |
-| `GET` | `/api/history` | ⏳ Phase 5 | Get user's past queries from Firestore |
-| `DELETE` | `/api/history/:id` | ⏳ Phase 5 | Delete a specific query from history |
+| `POST` | `/api/history` | ✅ Live | Save a query + response to Firestore |
+| `GET` | `/api/history/:userId` | ✅ Live | Get user's past queries from Firestore |
+| `DELETE` | `/api/history/:id` | ⏳ Phase 6 | Delete a specific query from history |
 
 ---
 
@@ -171,6 +177,8 @@ Create a `.env` file in `BackEnd/` — **never commit this file.**
 GROQ_API_KEY=        # From console.groq.com — free
 PORT=5000
 ```
+
+> Firebase credentials are handled via the Firebase Admin SDK service account — also never committed.
 
 ---
 
