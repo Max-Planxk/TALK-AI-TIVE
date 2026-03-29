@@ -407,7 +407,7 @@
       txt.textContent = msg;
     }
 
-    // ✅ PHASE 4 — loadUrl now hits real backend
+    // ✅ PHASE 4 — loadUrl hits real backend
     function loadUrl() {
       const val = urlInput.value.trim();
       if (!val) { showToast('⚠️ Paste a URL first.'); return; }
@@ -585,7 +585,32 @@
       cursor.classList.toggle('visible', showCursor);
     }
 
-    // ✅ PHASE 4 — sendToAI now hits real backend
+    // ✅ PHASE 5 — Save query + response to Firestore via backend
+    function saveToHistory(userText, aiReply) {
+      const userId = localStorage.getItem('talkaitiveUserId') || 'anonymous';
+      fetch('http://localhost:5000/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId:   userId,
+          url:      currentUrl,
+          query:    userText,
+          response: aiReply
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          console.log('✅ Query saved to Firestore history');
+        }
+      })
+      .catch(err => {
+        // Silent fail — don't bother the user if history save fails
+        console.warn('⚠️ History save failed (non-critical):', err);
+      });
+    }
+
+    // ✅ PHASE 4 + 5 — sendToAI hits backend, then saves to history
     function sendToAI(userText) {
       document.getElementById('transcript-cursor').classList.remove('visible');
       showThinking();
@@ -601,6 +626,7 @@
           typewriterResponse('❌ ' + data.error);
         } else {
           typewriterResponse(data.reply);
+          saveToHistory(userText, data.reply); // ✅ PHASE 5 — save to Firestore
         }
       })
       .catch(() => typewriterResponse('❌ Could not reach backend. Make sure node server.js is running.'));
@@ -674,7 +700,14 @@
       toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    document.getElementById('user-avatar').textContent = 'U';
+    // ✅ PHASE 5 — Show logged-in user's initial in avatar
+    const savedUserId = localStorage.getItem('talkaitiveUserId');
+    const savedEmail  = localStorage.getItem('talkaitiveUserEmail');
+    if (savedEmail) {
+      document.getElementById('user-avatar').textContent = savedEmail[0].toUpperCase();
+    } else {
+      document.getElementById('user-avatar').textContent = 'U';
+    }
   </script>
 </body>
 </html>
