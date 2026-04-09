@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { saveQuery, getUserQueries } = require('./firebase');
+const { saveQuery, getUserQueries, deleteQuery } = require('./firebase');
 
 const app = express();
 app.use(cors());
@@ -27,6 +27,17 @@ app.get('/api/history/:userId', async (req, res) => {
   try {
     const queries = await getUserQueries(userId);
     res.json(queries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete a specific query
+app.delete('/api/history/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await deleteQuery(id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

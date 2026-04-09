@@ -28,4 +28,9 @@ async function getUserQueries(userId) {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-module.exports = { db, saveQuery, getUserQueries };
+// Delete a single query by Firestore doc ID
+async function deleteQuery(docId) {
+  await db.collection('queries').doc(docId).delete();
+}
+
+module.exports = { db, saveQuery, getUserQueries, deleteQuery };
